@@ -1,0 +1,33 @@
+flowchart TB
+    Desktop["Desktop<br/>React 19 + Tauri 2"]
+    Mobile["Mobile<br/>Flutter + Riverpod"]
+    Web["Web<br/>React 19 + Vite"]
+    Agents["AI agents<br/>ACP + buzz-cli + MCP"]
+
+    Desktop -->|Signed Nostr events<br/>WebSocket or HTTP| Relay
+    Mobile -->|Signed Nostr events<br/>WebSocket or HTTP| Relay
+    Web -->|Signed Nostr events<br/>WebSocket or HTTP| Relay
+    Agents -->|Signed Nostr events<br/>WebSocket or HTTP| Relay
+
+    Relay["buzz-relay<br/>Rust + Axum + Tokio"]
+
+    Community["Community<br/>Host-derived security boundary"] -.-> Relay
+    Relay --> Core["buzz-core<br/>Kinds, types, signatures, filters"]
+    Relay --> Auth["buzz-auth<br/>Identity, permissions, rate limits"]
+    Relay --> DB["buzz-db<br/>PostgreSQL event store"]
+    Relay --> PubSub["buzz-pubsub<br/>Redis fan-out, presence, typing"]
+    Relay --> Search["buzz-search<br/>PostgreSQL full-text search"]
+    Relay --> Media["buzz-media<br/>Blossom + S3"]
+    Relay --> Workflow["buzz-workflow<br/>YAML + evalexpr"]
+    Relay --> Audit["buzz-audit<br/>Hash-chain audit log"]
+    Relay --> Git["Git smart HTTP"]
+
+    PubSub -->|Events from other relay nodes| Relay
+
+    subgraph DesignSystem["Design system implementations"]
+        DesktopDesign["Desktop / Web<br/>Semantic CSS variables<br/>Tailwind + Radix UI + CVA<br/>Inter + Lucide"]
+        MobileDesign["Mobile<br/>ThemeData + ColorScheme<br/>AppColors + Grid + Radii<br/>Inter + Lucide"]
+    end
+
+    DesktopDesign -. "Shared visual intent:<br/>semantic roles and light/dark themes" .-> MobileDesign
+

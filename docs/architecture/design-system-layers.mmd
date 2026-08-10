@@ -1,0 +1,14 @@
+flowchart TB
+    Intent["Shared intent: roles, hierarchy, light/dark behavior"]
+
+    Intent --> DesktopTokens["Desktop/web semantic CSS variables"]
+    DesktopTokens --> Tailwind["Tailwind tokens"]
+    Tailwind --> Radix["Radix primitives + CVA variants"]
+    Radix --> ReactComponents["Shared React components"]
+    ReactComponents --> DesktopFeatures["Desktop feature UI"]
+
+    Intent --> MobileTokens["Mobile ThemeData and extensions"]
+    MobileTokens --> FlutterTokens["ColorScheme, AppColors, Grid, Radii, textTheme"]
+    FlutterTokens --> SharedWidgets["Shared Flutter widgets"]
+    SharedWidgets --> MobileFeatures["Mobile feature UI"]
+

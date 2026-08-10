@@ -1,0 +1,96 @@
+flowchart TB
+    Communities[(communities)]
+
+    subgraph Identity[Identity and access]
+        Users[(users)]
+        Members[(relay_members)]
+        Allowlist[(pubkey_allowlist)]
+        Archived[(archived_identities)]
+        Tokens[(api_tokens)]
+        Policy[(join_policy_acceptances)]
+        Invites[(relay_invites)]
+    end
+
+    subgraph Collaboration[Channels and events]
+        Channels[(channels)]
+        ChannelMembers[(channel_members)]
+        Events[(events - monthly partitions)]
+        Mentions[(event_mentions)]
+        Threads[(thread_metadata)]
+        Reactions[(reactions)]
+        Watermarks[(parameterized_event_watermarks)]
+    end
+
+    subgraph Automation[Automation and delivery]
+        Workflows[(workflows)]
+        Runs[(workflow_runs)]
+        Approvals[(workflow_approvals)]
+        Fires[(scheduled_workflow_fires)]
+        Subscriptions[(subscriptions)]
+        Delivery[("delivery_log - monthly partitions<br/>PK excludes community_id")]
+    end
+
+    subgraph Moderation[Moderation]
+        Reports[(moderation_reports)]
+        Bans[(community_bans)]
+        Actions[(moderation_actions)]
+    end
+
+    subgraph Push[Community-scoped push]
+        Leases[(push_leases)]
+        Wake[(push_wake_outbox)]
+        Match[(push_match_queue)]
+    end
+
+    subgraph Operational[Operational and audit]
+        AuditLog[(audit_log - hash chain)]
+        RateLimit[(rate_limit_violations - global)]
+        GitRepos[(git_repo_names)]
+        Feedback[(product_feedback)]
+        Heartbeat[(replica_heartbeat - single row)]
+    end
+
+    PushGateway["push_gateway_* tables<br/>(6 tables, non-tenant-scoped,<br/>own migration set in buzz-push-gateway)"]
+
+    Communities --> Users
+    Communities --> Members
+    Communities --> Allowlist
+    Communities --> Archived
+    Communities --> Tokens
+    Communities --> Invites
+    Communities --> Channels
+    Communities --> Events
+    Communities --> Workflows
+    Communities --> Subscriptions
+    Communities --> Reports
+    Communities --> Bans
+    Communities --> Actions
+    Communities --> Leases
+    Communities --> Match
+    Communities --> AuditLog
+    Communities --> GitRepos
+    Communities --> Feedback
+
+    Users -->|agent_owner_pubkey, self relation| Users
+    Users --> Tokens
+    Users --> Workflows
+    Users --> Subscriptions
+    Members --> Policy
+    Channels --> ChannelMembers
+    Channels --> Workflows
+    Channels --> Threads
+    Channels --> Reports
+    Channels --> Actions
+    Workflows --> Runs
+    Workflows --> Approvals
+    Workflows --> Fires
+    Runs --> Approvals
+    Runs --> Fires
+    Reports -->|action_id| Actions
+    Leases --> Wake
+
+    Events -. trigger-enforced event IDs .-> Mentions
+    Events -. logical event IDs .-> Threads
+    Events -. logical event IDs .-> Reactions
+    Events -. insert trigger .-> Match
+    Subscriptions -. logical subscription ID .-> Delivery

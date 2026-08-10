@@ -1,0 +1,43 @@
+flowchart TB
+    Request["Incoming request<br/>WebSocket / HTTP"]
+
+    subgraph RowZero["Row zero: tenant binding (buzz-relay/src/tenant.rs)"]
+        Host["Normalize Host header"]
+        Lookup["Lookup communities.host<br/>UNIQUE(lower(host))"]
+        Reject["Generic rejection<br/>(no default tenant, host never echoed)"]
+        Tenant["TenantContext<br/>community_id + normalized host"]
+    end
+
+    Request --> Host --> Lookup
+    Lookup -->|"unmapped / empty / DB error<br/>(fail closed)"| Reject
+    Lookup -->|mapped| Tenant
+
+    subgraph AuthZ["Identity and admission (per community)"]
+        Auth["NIP-42 (WS) / NIP-98 (HTTP)<br/>relay URL must match tenant host"]
+        Membership["Relay membership + allowlist<br/>bans, timeouts, join policy"]
+        Scopes["Scopes per identity<br/>(required scope per event kind)"]
+    end
+
+    Tenant --> Auth --> Membership --> Scopes
+
+    subgraph Channel["Channel layer (NIP-29)"]
+        ChannelScope["h tag = channel scope<br/>d tag = channel definition"]
+        ChannelMembers["channel_members + roles<br/>checked at ingest AND fan-out"]
+    end
+
+    Scopes --> ChannelScope --> ChannelMembers
+
+    subgraph Storage["Storage isolation, keyed by community"]
+        PG["PostgreSQL<br/>composite PKs/FKs lead with community_id<br/>events PK: (community_id, created_at, id)"]
+        RedisT["Redis<br/>topics: buzz:{community}:channel:{id}<br/>(routing boundary; access re-checked)"]
+        S3T["Media / Blossom<br/>_meta/{community}/{sha256}"]
+        GitT["Git smart HTTP<br/>tenant from relay_url, never client input"]
+    end
+
+    ChannelMembers --> PG
+    ChannelMembers --> RedisT
+    ChannelMembers --> S3T
+    ChannelMembers --> GitT
+
+    Global["Operator-global tables (not tenant-scoped):<br/>rate_limit_violations, push_gateway_*, replica_heartbeat<br/>registered in _operator_global_tables"]
+    PG -.-> Global

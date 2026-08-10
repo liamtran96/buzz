@@ -1,0 +1,17 @@
+sequenceDiagram
+    participant U as Human in Buzz
+    participant R as Relay
+    participant H as buzz-acp harness
+    participant G as Agent process
+    participant T as MCP tools (buzz-dev-mcp)
+
+    U->>R: Mention, reminder, or workflow approval event
+    R-->>H: Matching subscription event
+    H->>G: ACP prompt over JSON-RPC
+    G->>T: Read context or perform scoped work
+    T->>R: Authenticated reads/writes
+    R-->>T: Events or write result
+    G-->>H: Agent response
+    H->>R: Signed Buzz response event
+    R-->>U: Realtime fan-out
+

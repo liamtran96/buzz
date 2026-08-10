@@ -1,0 +1,16 @@
+erDiagram
+    COMMUNITIES ||--o{ CHANNELS : contains
+    COMMUNITIES ||--o{ USERS : contains
+    COMMUNITIES ||--o{ EVENTS : owns
+    CHANNELS ||--o{ CHANNEL_MEMBERS : has
+    USERS ||--o{ CHANNEL_MEMBERS : joins
+    CHANNELS ||--o{ EVENTS : scopes
+    EVENTS ||--o| THREAD_METADATA : derives
+    EVENTS ||--o{ REACTIONS : receives
+    EVENTS ||--o{ EVENT_MENTIONS : indexes
+    COMMUNITIES ||--o{ WORKFLOWS : defines
+    WORKFLOWS ||--o{ WORKFLOW_RUNS : executes
+    WORKFLOW_RUNS ||--o{ WORKFLOW_APPROVALS : pauses_for
+    USERS ||--o{ API_TOKENS : owns
+    COMMUNITIES ||--o{ AUDIT_LOG : chains
+

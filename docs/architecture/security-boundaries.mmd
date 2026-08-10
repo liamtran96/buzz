@@ -1,0 +1,10 @@
+flowchart LR
+    Untrusted["Untrusted network and client input"] --> Edge["Axum edge: host, CORS, body/frame limits"]
+    Edge --> Identity["NIP-42 / NIP-98 / webhook-secret authentication"]
+    Identity --> Authorization["Scopes, relay membership, channel membership, roles"]
+    Authorization --> Validation["Signature, event ID, kind, tags, payload validation"]
+    Validation --> Services["Community-scoped relay services"]
+    Services --> PG["PostgreSQL composite tenant keys"]
+    Services --> Redis["Community-prefixed Redis keys/topics"]
+    Services --> S3["Community-scoped media/Git storage"]
+    Services --> Agent["Agent process: permission mode + configured MCP servers"]

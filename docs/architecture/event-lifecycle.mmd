@@ -1,0 +1,23 @@
+sequenceDiagram
+    participant C as Client
+    participant R as buzz-relay
+    participant A as buzz-auth/core
+    participant P as PostgreSQL
+    participant D as Redis
+    participant S as Subscribers
+    participant B as Background workers
+
+    C->>R: Open WebSocket
+    R-->>C: NIP-42 AUTH challenge
+    C->>R: Signed AUTH event
+    R->>A: Verify signature, host community, scopes
+    A-->>R: AuthContext
+    C->>R: EVENT with kind and tags
+    R->>A: Pubkey, signature, kind and membership checks
+    R->>P: Insert durable event<br/>(search tsvector generated inline)
+    P-->>R: Inserted or already exists
+    R->>D: Publish channel event
+    R-->>S: Local matching fan-out
+    R-->>C: OK
+    R-)B: Audit, workflow work
+

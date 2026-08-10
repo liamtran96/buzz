@@ -1,0 +1,12 @@
+flowchart LR
+    Source["block/buzz source"] --> Releases["buzz-releases: signed desktop/mobile builds"]
+    Source --> Image["sprout-oss: relay container image"]
+    Image --> Deploy["block-coder-tf-stacks: Terraform + ArgoCD"]
+    Deploy --> K8s["Kubernetes relay deployment"]
+    Provider["sprout-backend-blox"] --> Desktop["Desktop agent launcher"]
+    Desktop --> Relay["Relay nodes"]
+    K8s --> Relay
+    Relay --> PG["PostgreSQL"]
+    Relay --> Redis["Redis"]
+    Relay --> S3["S3-compatible storage"]
+
